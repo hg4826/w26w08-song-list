@@ -1,5 +1,5 @@
 import type { Route } from "./+types/login";
-import { Form, redirect, useNavigation } from 'react-router'
+import { Form, Link, redirect, useNavigation } from 'react-router'
 import { useAuthStore } from "~/lib/auth-store";
 
 export function meta({}: Route.MetaArgs) {
@@ -66,6 +66,9 @@ export default function Login({ actionData }: Route.ComponentProps) {
           {isSubmitting ? "로그인 중..." : "로그인"}
         </button>
       </Form>
+      <p className="mt-4 text-sm">
+        계정이 없나요? <Link to="/signup" className="text-blue-500 underline">회원가입</Link>
+      </p>
     </div>
   )
 }
