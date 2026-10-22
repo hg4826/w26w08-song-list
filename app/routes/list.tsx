@@ -1,5 +1,5 @@
 import type { Route } from "./+types/list";
-import { useLoaderData } from 'react-router'
+import { Form, redirect, useLoaderData } from 'react-router'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from "~/lib/auth-store";
 
@@ -14,15 +14,11 @@ export async function clientLoader() {
   //-------------------------------------------------------
   // 세션 확인
   //-------------------------------------------------------
-  if (useAuthStore.getState().status === "loading") {
-    // 로그인 상태가 아직 로딩 중이면, 세션을 확인하고 상태를 업데이트
-    const { data: { session } } = await supabase.auth.getSession()
-    useAuthStore.getState().setSession(session)
-  }
+  const session = await useAuthStore.getState().initSession()
 
-  if (!useAuthStore.getState().session) {
+  if (!session) {
     console.log("로그인 세션 없음")
-    return { songs: [], user: null }
+    return redirect("/login")
   }
 
   //-------------------------------------------------------
@@ -56,6 +52,9 @@ export default function List() {
   return (
     <div>
       <h2>애창곡 리스트 ({user?.email})</h2>
+      <Form method="post" action="/logout">
+        <button type="submit">로그아웃</button>
+      </Form>
       {songs.length === 0 ? (
         <p>등록된 노래가 없거나 데이터를 불러오지 못했습니다.</p>
       ) : (

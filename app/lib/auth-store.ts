@@ -12,6 +12,7 @@ interface AuthState {
   status: AuthStatus
 
   setSession: (session: Session | null) => void
+  initSession: () => Promise<Session | null>
   signUp: (
     email: string,
     password: string,
@@ -23,7 +24,7 @@ interface AuthState {
   signOut: () => Promise<void>
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>((set, get) => ({
   session: null,
   user: null,
   status: "loading",
@@ -34,6 +35,15 @@ export const useAuthStore = create<AuthState>((set) => ({
       user: session?.user ?? null,
       status: session ? "authenticated" : "unauthenticated",
     }),
+
+  // 로그인 상태가 아직 로딩 중이면, 세션을 확인하고 상태를 업데이트
+  initSession: async () => {
+    if (get().status === "loading") {
+      const { data: { session } } = await supabase.auth.getSession()
+      get().setSession(session)
+    }
+    return get().session
+  },
 
   signUp: async (email, password) => {
     const { data, error } = await supabase.auth.signUp({
